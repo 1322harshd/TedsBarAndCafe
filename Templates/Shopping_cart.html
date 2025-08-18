@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="shopping-cart">
+  <h1>Shopping cart</h1>
+  <div class="cart-items">
+    {% for item in cart_items %}
+    <div class="cart-item">
+      <img src="{{ url_for('static', filename='images/' ~ item.image) }}" alt="{{ item.name }}">
+      <div class="item-details">
+        <span class="item-name">{{ item.name }}</span>
+        <div class="item-qty-row">
+          <span class="item-label">Quantity</span>
+          
+          <input type="number" max="10" value="{{ item.quantity }}" class="item-qty">
+        </div>
+        <div class="item-price-row">
+          <span class="item-label">Price</span>
+          <span class="item-price">${{ "%.2f"|format(item.price) }}</span>
+          <!-- Add total price for this item -->
+          <span class="item-total-price" style="float:right;">
+            Total: ${{ "%.2f"|format(item.price * item.quantity) }}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="cart-summary">
+    <table style="width:100%;">
+      <tr>
+        <td>Sub Total:</td>
+        <td class="summary-value" style="text-align:right;">$<span id="sub-total">{{ "%.2f"|format(subtotal) }}</span></td>
+      </tr>
+      <tr>
+        <td>TAXES (Included GST):</td>
+        <td class="summary-value" style="text-align:right;">$<span id="taxes">{{ "%.2f"|format(taxes) }}</span></td>
+      </tr>
+      <tr>
+        <td>Other charges:</td>
+        <td class="summary-value" style="text-align:right;">$<span id="other-charges">{{ "%.2f"|format(other_charges) }}</span></td>
+      </tr>
+      <tr class="total-row">
+        <td><strong>Total Amount:</strong></td>
+        <td class="summary-value" style="text-align:right;"><strong>$<span id="total-amount">{{ "%.2f"|format(total) }}</span></strong></td>
+      </tr>
+    </table>
+    <div class="pay-btn-row">
+      <form id="proceed-pay-form" action="/Payment" method="get">
+        <input type="hidden" name="subtotal" id="hidden-subtotal" value="{{ subtotal }}">
+        <input type="hidden" name="taxes" id="hidden-taxes" value="{{ taxes }}">
+        <input type="hidden" name="other_charges" id="hidden-other-charges" value="{{ other_charges }}">
+        <input type="hidden" name="total" id="hidden-total" value="{{ total }}">
+        <button type="submit" id="proceed-pay">Proceed with pay</button>
+      </form>
+    </div>
+  </div>
+  <div class="feedback">
+    <p class="feedback-title"><span style="font-size:18px;">&#128172;</span> <strong>We Value Your Feedback!</strong></p>
+    <p>Your thoughts help us grow and improve. Click the link below to share your feedback, suggestions, or ideas for future improvements—we're all ears!</p>
+    <a href="{{ url_for('feedback') }}" class="feedback-link">– Share Your Feedback</a>
+    <p class="feedback-thank"><strong>Thank you for helping us make things better!</strong></p>
+  </div>
+</div>
+<script>
+document.querySelectorAll('.item-qty').forEach(function(input, idx) {
+  input.addEventListener('input', function() {
+    // Get price for this item
+    const price = parseFloat(
+      input.closest('.item-details').querySelector('.item-price').textContent.replace('$','')
+    );
+    // Calculate new total for this item
+    const qty = parseInt(input.value) || 1;
+    const itemTotal = price * qty;
+    // Update item total price display
+    input.closest('.item-details').querySelector('.item-total-price').textContent = 'Total: $' + itemTotal.toFixed(2);
+
+    // Update cart summary
+    let subtotal = 0;
+    document.querySelectorAll('.cart-item').forEach(function(item) {
+      const qty = parseInt(item.querySelector('.item-qty').value) || 1;
+      const price = parseFloat(item.querySelector('.item-price').textContent.replace('$',''));
+      subtotal += qty * price;
+    });
+    document.getElementById('sub-total').textContent = subtotal.toFixed(2);
+
+    // Update taxes and total
+    const taxes = +(subtotal * 0.10).toFixed(2);
+    document.getElementById('taxes').textContent = taxes.toFixed(2);
+
+    const otherCharges = parseFloat(document.getElementById('other-charges').textContent) || 0;
+    const total = subtotal + taxes + otherCharges;
+    document.getElementById('total-amount').textContent = total.toFixed(2);
+
+    // Update hidden fields for payment form
+    document.getElementById('hidden-subtotal').value = document.getElementById('sub-total').textContent;
+    document.getElementById('hidden-taxes').value = document.getElementById('taxes').textContent;
+    document.getElementById('hidden-other-charges').value = document.getElementById('other-charges').textContent;
+    document.getElementById('hidden-total').value = document.getElementById('total-amount').textContent;
+  });
+});
+</script>
+{% endblock %}

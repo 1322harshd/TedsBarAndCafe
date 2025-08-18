@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main contact-main">
+  <div class="contact-info">
+    <h2>Company Contact Details</h2>
+    <p><span style="font-size:18px;">&#128205;</span> 375 Greenwich St, New York, NY 10013</p>
+    <p><span style="font-size:18px;">&#128222;</span> +64909090404040</p>
+    <p><span style="font-size:18px;">&#128231;</span> drink@tedsbarandcafe.com</p>
+    <!-- Live Google Map Embed -->
+    <iframe
+  src="https://www.google.com/maps?q=375+Greenwich+St,+New+York,+NY+10013&output=embed"
+  width="100%" height="180" style="border-radius:5px; border:1px solid #d1bfa3;"
+  allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+  class="contact-map-img"></iframe>
+  </div>
+  <div class="contact-form">
+    <h2>Contact Form</h2>
+    <form>
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" />
+
+      <label for="email">Email ID</label>
+      <input type="email" id="email" name="email" />
+
+      <label for="message">Message Box</label>
+      <textarea id="message" name="message" rows="5"></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

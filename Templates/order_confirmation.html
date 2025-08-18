@@ -1,0 +1,27 @@
+<!-- order_confirmation.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="confirmation-container">
+  {% if success %}
+    <div class="confirmation-icon success">&#10004;</div>
+    <h2>Order Confirmed</h2>
+    <p>Thank you for choosing Ted's Bar and Café!</p>
+    <p>Your payment has been processed successfully.</p>
+    <p><strong>Estimated delivery or pickup:</strong> 30–45 minutes.</p>
+    <p>A detailed receipt has been sent to your email address.</p>
+    <div class="confirmation-links">
+      <a href="{{ url_for('menu_page') }}">Back to Menu</a> | 
+      <a href="{{ url_for('contact') }}">Contact Support</a>
+    </div>
+  {% else %}
+    <div class="confirmation-icon failure">&#10006;</div>
+    <h2>Order Not Completed</h2>
+    <p>Unfortunately, your payment could not be processed.</p>
+    <p>Please review your card details and try again.</p>
+    <p>If you continue to experience issues, <a href="{{ url_for('contact') }}">contact our support team</a>.</p>
+    <div class="confirmation-links">
+      <a href="{{ url_for('menu_page') }}">Back to Menu</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

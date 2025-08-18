@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Website meta data-->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Webpage title -->
+    <title>{% block title %}Ted's Bar and Café{% endblock %}</title>
+
+    <!-- SEO -->
+    <meta name="description" content="Discover the best coffee in your city at Ted's Bar and Café. We serve freshly brewed artisan coffee, espresso drinks, and homemade pastries in a cozy, welcoming café. Perfect for coffee lovers, remote work, or casual hangouts.">
+    <meta name="keywords" content="cappuccino,mocha,long black,english breakfast,latte,iced mocha,iced latte, iced americano,chai latte,mint blend,coffee">
+    <meta name="author" content="Ted's Bar and Café Team">
+    <meta property="og:title" content="Ted's Bar and Café">
+    <meta property="og:description" content="Discover the best coffee in your city at Ted's Bar and Café. We serve freshly brewed artisan coffee, espresso drinks, and homemade pastries in a cozy, welcoming café. Perfect for coffee lovers, remote work, or casual hangouts.">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+
+    <!-- External font -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+</head>
+<body>
+    <!-- Logo -->
+    <div class="logo">
+        <img src="{{ url_for('static', filename='images/shop_logo.png') }}" alt="shop_logo" height="150px" width="150px">
+    </div>
+
+    <!-- Navigation bar -->
+    <nav>
+        <ul>
+            <li><a href="/menu">Menu</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+            <li><a href="/cart">Cart</a></li>
+            
+        </ul>
+    </nav>
+ 
+    {% block content %}{% endblock %}
+
+    <footer>
+    <div class="sub-class-footer">
+        <!-- logo in footer -->
+        <div class="footer-logo" >
+        <img src="{{ url_for('static', filename='images/shop_logo.png') }}" alt="shop_logo" height="120px" width="120px">
+        </div>
+        <div class="shop-info">
+        <!-- cafe name and copyright -->
+         <p> 
+            Ted's Bar and Café<br>
+            © 2025 Brew & Bean Café
+         </p>
+         <!-- contact info -->
+         <address>
+         <a href="mailto:drink@tedsbarandcafe.com">Email: drink@tedsbarandcafe.com</a><br>
+         <a href="tel:+64909090404040">Phone: +64909090404040</a>
+         </address>
+         <!-- social media links -->
+          <section class="social-media">
+            <p>Follow Us On:</p>
+            <ul>
+                <li>
+                    <a href="#" target="_blank">
+                    <img src="{{ url_for('static', filename='logos/facebook.png') }}" alt="facebook-logo">
+                </a>
+                </li>
+                <li>
+                    <a href="#" target="_blank">
+                    <img src="{{ url_for('static', filename='logos/instagram.png') }}" alt="instagram-logo">
+                </a>
+                </li>
+                <li>
+                    <a href="#" target="_blank">
+                    <img src="{{ url_for('static', filename='logos/tiktok.png') }}" alt="tiktok-logo">
+                </a>
+                </li>
+                
+            </ul>
+          </section>
+
+        </div>
+        <!-- quick access links in the footer -->
+        <div class="footer-links">
+        <ul>
+            <li>
+                <a href="#" target="_self">About</a>
+            </li>
+            <li>
+                <a href="#" target="_self">Contact Us</a>
+            </li>
+            <li>
+                <a href="#" target="_self">Menu</a>
+            </li>
+            <li>
+                <a href="#" target="_self">Cart</a>
+            </li>
+        </ul>
+        </div>
+    </div>
+    <!-- policy links -->
+     <div class="policies">
+        <ul>
+            <li><a href="#" target="_blank">Privacy Policy |</a></li>
+            <li><a href="#" target="_blank">Terms and Conditions |</a></li>
+            <li><a href="#" target="_blank">Cookie Policy </a></li>
+        </ul>
+     </div>
+    </footer>
+</body>
+</html>

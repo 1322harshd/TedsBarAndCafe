@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="payment-popup-bg">
+    <div class="payment-popup-container">
+        <div class="payment-popup-tabs">
+            <span class="tab active" data-tab="debit">Debit Card</span>
+            <span class="tab" data-tab="credit">Credit Card</span>
+            <span class="tab" data-tab="rewards">Rewards</span>
+        </div>
+        
+        <form class="payment-popup-form" id="payment-form" method="POST" action="{{ url_for('order_confirmation') }}">
+            <label>Full Name</label>
+            <input type="text" name="fullname" id="fullname" placeholder="for ex-Karamjeet" required />
+
+            <label>Email</label>
+            <input type="email" name="email" id="email" placeholder="for ex-Karam@gmail.com" required />
+
+            <label>Phone Number</label>
+            <input type="tel" name="phone" id="phone" placeholder="for ex-+64,02247474747" required />
+
+            <label>Delivery Address</label>
+            <input type="text" name="address" id="address" placeholder="for ex - great south road" required />
+
+            <label>Special Instructions</label>
+            <textarea name="instructions" id="instructions" placeholder="for ex- ditery or use hot bag to deliver"></textarea>
+
+            <label>Card Number</label>
+            
+            <input type="text" name="card_number" placeholder="for ex-1111-1111-1111-1111" required />
+
+            <div class="payment-popup-row">
+                
+                <div>
+                    <label>MM/YY</label>
+                    <input type="text" name="expiry" placeholder="for ex-11/11" required />
+                </div>
+                <div>
+                    <label>CVC</label>
+                    <input type="text" name="cvc" placeholder="for ex-111" required />
+                </div>
+            </div>
+
+            <label>Name on Card</label>
+            
+            <input type="text" name="card_name" placeholder="for ex- Name on Card" required />
+
+            <div class="payment-popup-summary">
+              <table style="width:100%;">
+                <tr>
+                  <td>Sub Total:</td>
+                  <td class="summary-value" style="text-align:right;">${{ '%.2f'|format(subtotal) }}</td>
+                </tr>
+                <tr>
+                  <td>Tax:</td>
+                  <td class="summary-value" style="text-align:right;">${{ '%.2f'|format(taxes) }}</td>
+                </tr>
+                <tr>
+                  <td>Delivery charges:</td>
+                  <td class="summary-value" style="text-align:right;">${{ '%.2f'|format(other_charges) }}</td>
+                </tr>
+                <tr class="total-row">
+                  <td><strong>Total:</strong></td>
+                  <td class="summary-value" style="text-align:right;"><strong>${{ '%.2f'|format(total) }}</strong></td>
+                </tr>
+              </table>
+              {% if errors %}
+                <ul style="color: #d32f2f;">
+                 {% for error in errors %}
+                   <li>{{ error }}</li>
+                 {% endfor %}
+               </ul>
+              {% endif %}
+            </div>
+            <input type="hidden" name="subtotal" value="{{ subtotal }}">
+            <input type="hidden" name="taxes" value="{{ taxes }}">
+            <input type="hidden" name="other_charges" value="{{ other_charges }}">
+            <input type="hidden" name="total" value="{{ total }}">
+            <button type="submit" class="payment-popup-pay-btn">Pay</button>
+        </form>
+    </div>
+</div>
+<script>
+function showError(input, message) {
+    let error = input.nextElementSibling;
+    if (!error || !error.classList.contains('error-msg')) {
+        error = document.createElement('span');
+        error.className = 'error-msg';
+        input.parentNode.insertBefore(error, input.nextSibling);
+    }
+    error.textContent = message;
+    input.classList.add('error');
+}
+function clearError(input) {
+    let error = input.nextElementSibling;
+    if (error && error.classList.contains('error-msg')) {
+        error.textContent = '';
+    }
+    input.classList.remove('error');
+}
+
+document.getElementById('payment-form').addEventListener('input', function(e) {
+    const card = document.querySelector('input[placeholder="Card Number"]');
+    const expiry = document.querySelector('input[placeholder="MM/YY"]');
+    const cvc = document.querySelector('input[placeholder="CVC"]');
+    const name = document.querySelector('input[placeholder="Name on Card"]');
+
+    // Card number: 16 digits
+    if (card.value.replace(/\D/g, '').length !== 16) {
+        showError(card, "Card number must be 16 digits.");
+    } else {
+        clearError(card);
+    }
+    // Expiry: MM/YY and not expired
+    const expMatch = expiry.value.match(/^(\d{2})\/(\d{2})$/);
+    if (!expMatch) {
+        showError(expiry, "Expiry must be MM/YY.");
+    } else {
+        const mm = parseInt(expMatch[1], 10);
+        const yy = parseInt(expMatch[2], 10) + 2000;
+        const now = new Date();
+        const expDate = new Date(yy, mm);
+        if (mm < 1 || mm > 12 || expDate < now) {
+            showError(expiry, "Card expired or invalid month.");
+        } else {
+            clearError(expiry);
+        }
+    }
+    // CVC: 3 digits
+    if (!/^\d{3}$/.test(cvc.value)) {
+        showError(cvc, "CVC must be 3 digits.");
+    } else {
+        clearError(cvc);
+    }
+    // Name: not empty
+    if (!name.value.trim()) {
+        showError(name, "Cardholder name required.");
+    } else {
+        clearError(name);
+    }
+});
+
+document.querySelectorAll('.payment-popup-tabs .tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.payment-popup-tabs .tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+    tab.classList.add('active');
+    // Optionally,  it will show or hide tab content here
+  });
+});
+</script>
+{% endblock %}

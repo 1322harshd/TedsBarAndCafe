@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="product-image-container">
+    <div class="images">
+        <img src="{{ url_for('static', filename='images/background.jpeg') }}" class="bg">
+        <img src="{{ url_for('static', filename='images/' ~ product.img) }}" alt="drink-of-day" class="fg">
+    </div>
+  <h1>{{product.name}}</h1>
+</div>
+<!-- section for product description and product size selection buttons -->
+<section class="product-information">
+    <div class="product-description">
+    <p>Americano is a classic espresso-based drink 
+made by diluting a shot of espresso with hot water, 
+offering a smooth, bold flavor similar to traditional
+brewed coffee.</p>
+    </div>
+    <div class="product-sizes-and-price">
+     <ul>
+        <li><button onclick=""><img src="{{ url_for('static', filename='logos/coffee-cup.webp') }}" alt="small-cup" height="70px" width="70px"><span>$5</span></button> </li>
+        <li><button onclick=""><img src="{{ url_for('static', filename='logos/coffee-cup.webp') }}" alt="medium-cup" height="80px" width="80px"><span>$7</span></button> </li>
+        <li><button onclick=""><img src="{{ url_for('static', filename='logos/coffee-cup.webp') }}" alt="large-cup" height="90px" width="90px"><span>$9</span></button> </li>
+     </ul>
+    </div>
+</section>
+<!-- section for related products to the selected products -->
+ <section class="related-products">
+    <h2>Related Products</h2>
+    <div class="related-product-card">
+        {% for product in related %}
+         <a href="{{ url_for('selected_product', id=product.id) }}">
+        <div class="related-card-items">
+            <div class="related-img-container">
+                <img src="{{ url_for('static', filename='images/' ~ product.img) }}" alt="{{ category }}">
+            </div>
+            <div class="related-card-item-info">
+                <p>{{ product.name }}</p>
+                <p>{{ product.price }}</p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    </div>
+ </section>
+{% endblock %}

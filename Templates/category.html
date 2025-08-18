@@ -1,0 +1,21 @@
+
+<div class="all-lists">
+{% for category, items in grouped_items.items() %}
+    <h2>{{ category }}</h2>
+    <div class="product-card">
+    {% for item in items %}
+    <a href="{{ url_for('selected_product', id=item.id) }}">
+        <div class="card-items">
+            <div class="img-container">
+                <img src="{{ url_for('static', filename='images/' ~ item.img) }}" alt="{{ category }}">
+            </div>
+            <div class="card-item-info">
+                <p>{{ item.name }}</p>
+                <p>{{ item.price }}</p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    </div>
+{% endfor %}
+</div>

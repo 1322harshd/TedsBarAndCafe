@@ -693,7 +693,7 @@ padding-left:50px;
 .feedback-thank {
   color: #5c1a1b;
   font-weight: bold;
-<<<<<<< HEAD
+
 
 }
 .history h1{
@@ -701,8 +701,60 @@ padding-left:50px;
      font-style: bold;
      color:rgba(87, 21, 35, 1);
 
-=======
->>>>>>> 135cb0f (change the name of payment.html and also fixing in the html code and add some extra options)
+
+}
+
+/* Confirmation container centers the message box on the page and styles it */
+.confirmation-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  background: #fff8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #ccc;
+  padding: 40px 32px;
+  margin: 40px auto;
+  max-width: 400px;
+}
+
+/* Confirmation icon styles for tick/cross */
+.confirmation-icon {
+  font-size: 60px;
+  margin-bottom: 10px;
+}
+
+/* Green tick for success */
+.confirmation-icon.success {
+  color: #4BB543;
+}
+
+/* Red cross for failure */
+.confirmation-icon.failure {
+  color: #d32f2f;
+}
+
+/* Links below the confirmation message */
+.confirmation-links {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.confirmation-links a {
+  text-decoration: none;
+  color: #5a2121;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.confirmation-links a:hover {
+  text-decoration: underline;
+
 }
 
 /* Payment Popup Background */
@@ -822,7 +874,6 @@ padding-left:50px;
 }
 .payment-popup-pay-btn:hover {
   background-color: #4a1415;
-<<<<<<< HEAD
 }
 .hidden {
     display: none;
@@ -946,6 +997,6 @@ padding-left:50px;
   background-color: #4a1415;
 }
 
-=======
+.hidden {
+    display: none;
 }
->>>>>>> 135cb0f (change the name of payment.html and also fixing in the html code and add some extra options)

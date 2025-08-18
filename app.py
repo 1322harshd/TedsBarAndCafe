@@ -13,6 +13,13 @@ from models import db, Product, Size, ProductPrice
 
 db.init_app(app)
 #about page route
+from flask import Flask,render_template
+from collections import defaultdict
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+# About page route
 @app.route("/about")
 def about_page():
   return render_template('about_page.html')
@@ -71,6 +78,35 @@ def cart():
     taxes = round(subtotal * 0.10, 2)  # Example 10% tax
     other_charges = 2.00  # Example other charges
     total = round(subtotal + taxes + other_charges, 2)
+    # Render the about page template
+    return render_template('about_page.html')
+
+# Contact page route
+@app.route('/contact')
+def contact():
+    # Render the contact us page template
+    return render_template('Contact_uspage.html')
+
+# Cart page route
+@app.route('/cart')
+def cart():
+    # example cart items
+    # Example cart items (would be dynamic in a real app)
+    cart_items = [
+       
+    ]
+    # Calculate subtotal
+    subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
+    # Calculate total quantity
+    total_quantity = sum(item['quantity'] for item in cart_items)
+    # Apply other charges only if 3 or more items are ordered
+    if total_quantity >= 3:
+        other_charges = round(subtotal * 0.015, 2)  # 1.5% of subtotal
+    else:
+        other_charges = 0.00
+    taxes = round(subtotal * 0.18, 2)  # 18% tax
+    total = round(subtotal + taxes + other_charges, 2)
+    # Render the shopping cart template with calculated values
     return render_template(
         'Shopping_cart.html',
         cart_items=cart_items,

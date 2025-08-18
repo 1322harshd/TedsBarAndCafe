@@ -1,17 +1,17 @@
-from flask import Flask,render_template
-from flask_migrate import Migrate
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+from collections import defaultdict
 
+# Initialize Flask app
 app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:13Dhillon%40nz@localhost:5432/TedsBarAndCafeDatabase"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///your_database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)   # initialize here
-migrate = Migrate(app, db)
 
-from models import Product, Size, ProductPrice  # import after db is created
+# Import models after app is created
+from models import db, Product, Size, ProductPrice
 
+db.init_app(app)
 #about page route
 @app.route("/about")
 def about_page():

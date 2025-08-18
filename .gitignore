@@ -1,0 +1,46 @@
+# Byte-compiled / Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Flask/Middleware settings
+instance/
+*.env
+*.ini
+*.cfg
+
+# IDE/editor folders
+.vscode/
+.idea/
+*.swp
+
+# Mac OS and system files
+.DS_Store
+Thumbs.db
+
+# Database files (if local SQLite or test DBs)
+*.db
+*.sqlite3
+
+# Logs and coverage reports
+*.log
+*.coverage
+coverage/
+htmlcov/
+
+# Flask migrations (if using Flask-Migrate)
+migrations/
+
+# Compiled frontend files (if using tools like webpack)
+node_modules/
+dist/
+build/
+
+# Static assets (optional if built externally)
+static/uploads/

@@ -7,7 +7,8 @@
             <span class="tab" data-tab="credit">Credit Card</span>
             <span class="tab" data-tab="rewards">Rewards</span>
         </div>
-        <form class="payment-popup-form" id="payment-form">
+        
+        <form class="payment-popup-form" id="payment-form" method="POST" action="{{ url_for('order_confirmation') }}">
             <label>Full Name</label>
             <input type="text" name="fullname" id="fullname" placeholder="for ex-Karamjeet" required />
 
@@ -24,28 +25,56 @@
             <textarea name="instructions" id="instructions" placeholder="for ex- ditery or use hot bag to deliver"></textarea>
 
             <label>Card Number</label>
-            <input type="text" placeholder="for ex-1111-1111-1111-1111" />
+            
+            <input type="text" name="card_number" placeholder="for ex-1111-1111-1111-1111" required />
 
             <div class="payment-popup-row">
+                
                 <div>
                     <label>MM/YY</label>
-                    <input type="text" placeholder="for ex-11/11" />
+                    <input type="text" name="expiry" placeholder="for ex-11/11" required />
                 </div>
                 <div>
                     <label>CVC</label>
-                    <input type="text" placeholder="for ex-111" />
+                    <input type="text" name="cvc" placeholder="for ex-111" required />
                 </div>
             </div>
 
             <label>Name on Card</label>
-            <input type="text" placeholder="for ex- Name on Card" />
+            
+            <input type="text" name="card_name" placeholder="for ex- Name on Card" required />
 
             <div class="payment-popup-summary">
-                <div>Subtotal <span>$00.00</span></div>
-                <div>Tax <span>$0.00</span></div>
-                <div>Delivery charges <span>$0.00</span></div>
-                <div class="total">Total: <span>$00.00</span></div>
+              <table style="width:100%;">
+                <tr>
+                  <td>Sub Total:</td>
+                  <td class="summary-value" style="text-align:right;">${{ '%.2f'|format(subtotal) }}</td>
+                </tr>
+                <tr>
+                  <td>Tax:</td>
+                  <td class="summary-value" style="text-align:right;">${{ '%.2f'|format(taxes) }}</td>
+                </tr>
+                <tr>
+                  <td>Delivery charges:</td>
+                  <td class="summary-value" style="text-align:right;">${{ '%.2f'|format(other_charges) }}</td>
+                </tr>
+                <tr class="total-row">
+                  <td><strong>Total:</strong></td>
+                  <td class="summary-value" style="text-align:right;"><strong>${{ '%.2f'|format(total) }}</strong></td>
+                </tr>
+              </table>
+              {% if errors %}
+                <ul style="color: #d32f2f;">
+                 {% for error in errors %}
+                   <li>{{ error }}</li>
+                 {% endfor %}
+               </ul>
+              {% endif %}
             </div>
+            <input type="hidden" name="subtotal" value="{{ subtotal }}">
+            <input type="hidden" name="taxes" value="{{ taxes }}">
+            <input type="hidden" name="other_charges" value="{{ other_charges }}">
+            <input type="hidden" name="total" value="{{ total }}">
             <button type="submit" class="payment-popup-pay-btn">Pay</button>
         </form>
     </div>

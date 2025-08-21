@@ -60,7 +60,8 @@ def contact():
 # Cart page route
 @app.route('/cart')
 def cart():
-    
+    # example cart items
+    # Example cart items (would be dynamic in a real app)
     cart_items = [
        
     ]

@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template,request
 from models import db, Product, Size, ProductPrice
 from collections import defaultdict
 
@@ -40,10 +40,18 @@ def filter_category(category):
 # route → shows details of a single product, including sizes and prices
 @app.route("/product/<int:id>")
 def selected_product(id):
-    product = Product.query.get_or_404(id)  # get product or 404
-    prices = ProductPrice.query.filter_by(product_id=id).all()  # get prices for all sizes
-    return render_template("selected_product_page.html", product=product, prices=prices)
+    # Get the product the user clicked on
+    product = Product.query.get_or_404(id)
 
+    # Get related products (same category, but not the same product)
+    related_products = Product.query.filter(
+        Product.category == product.category,
+        Product.id != product.id
+    ).limit(4).all()  # limit to 4 items for display
+
+    return render_template("selected_product_page.html", product=product, related_products=related_products)
+
+ 
 # Contact page route
 @app.route('/contact')
 def contact():

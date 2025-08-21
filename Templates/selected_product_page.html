@@ -28,7 +28,7 @@ brewed coffee.</p>
  <section class="related-products">
     <h2>Related Products</h2>
     <div class="related-product-card">
-        {% for product in related %}
+        {% for product in related_products %}
          <a href="{{ url_for('selected_product', id=product.id) }}">
         <div class="related-card-items">
             <div class="related-img-container">

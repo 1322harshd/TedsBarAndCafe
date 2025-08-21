@@ -1,55 +1,48 @@
-from flask import Flask,render_template
+from flask import Flask, render_template
+from models import db, Product, Size, ProductPrice
 from collections import defaultdict
-from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# About page route
-@app.route("/about")
-def about_page():
-  return render_template('about_page.html')
-#menu route with all item display functionality
-items = [
-    {'id':1,'name': 'Espresso', 'category': 'hot-coffees','img':'cappucino.png','price':'$5'},
-    {'id':2,'name': 'Latte', 'category': 'hot-coffees','img':'cappucino.png','price':'$5'},
-    {'id':3,'name': 'Green Tea', 'category': 'Tea','img':'cappucino.png','price':'$5'},
-    {'id':4,'name': 'Black Tea', 'category': 'Tea','img':'cappucino.png','price':'$5'},
-    {'id':5,'name': 'Croissant', 'category': 'Pastry','img':'cappucino.png','price':'$5'}
-]
+# Database configuration (SQLite for example)
+# change URI to PostgreSQL/MySQL if required
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13Dhillon40%nz@TedsBarAndCafe'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-@app.route("/menu")
-def menu_page():
-    grouped_items = group_items(items)  # All items
-    return render_template("menu_page.html", grouped_items=grouped_items)
+# initialize db with app
+db.init_app(app)
 
-@app.route("/filter/<category>")
-def filter_category(category):
-    filtered = [item for item in items if item['category'].lower() == category.lower()]
-    grouped_items = group_items(filtered)
-    return render_template("category.html", grouped_items=grouped_items)
 
+# helper function → groups products by category
 def group_items(item_list):
     grouped = defaultdict(list)
     for item in item_list:
-        grouped[item['category']].append(item)
+        grouped[item.category.strip()].append(item)
     return grouped
 
-# hardcoded selected product page
-@app.route("/spp/<int:id>")
+
+# route → shows the full menu grouped by categories
+@app.route("/menu")
+def menu_page():
+    items = Product.query.all()  # fetch all products
+    grouped_items = group_items(items)  # group by category
+    return render_template("menu_page.html", grouped_items=grouped_items)
+
+
+# route → shows products filtered by category (like "Hot Coffees")
+@app.route("/filter/<category>")
+def filter_category(category):
+    filtered = Product.query.filter(Product.category.ilike(category)).all()
+    grouped_items = group_items(filtered)
+    return render_template("category.html", grouped_items=grouped_items)
+
+
+# route → shows details of a single product, including sizes and prices
+@app.route("/product/<int:id>")
 def selected_product(id):
-       # find the product with matching id
-    product = next((p for p in items if p["id"] == id), None)
-    if not product:
-        return "Product not found", 404
-
-    # find related products from same category
-    related = [p for p in items if p["category"] == product["category"] and p["id"] != id]
-
-    return render_template("selected_product_page.html", product=product, related=related)
-
-
-    # Render the about page template
-    return render_template('about_page.html')
+    product = Product.query.get_or_404(id)  # get product or 404
+    prices = ProductPrice.query.filter_by(product_id=id).all()  # get prices for all sizes
+    return render_template("selected_product.html", product=product, prices=prices)
 
 # Contact page route
 @app.route('/contact')

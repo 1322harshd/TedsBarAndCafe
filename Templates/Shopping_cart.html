@@ -8,9 +8,12 @@
       <img src="{{ url_for('static', filename='images/' ~ item.image) }}" alt="{{ item.name }}">
       <div class="item-details">
         <span class="item-name">{{ item.name }}</span>
+        <div class="item-size-row">
+          <span class="item-label">Size:</span>
+          <span class="item-size">{{ item.size|capitalize }}</span>
+        </div>
         <div class="item-qty-row">
           <span class="item-label">Quantity</span>
-          
           <input type="number" max="10" value="{{ item.quantity }}" class="item-qty">
         </div>
         <div class="item-price-row">
@@ -22,6 +25,7 @@
           </span>
         </div>
       </div>
+      <button class="remove-item-btn" onclick="removeFromCart('{{ loop.index0 }}')" title="Remove item" style="background:none;border:none;cursor:pointer;font-size:18px;float:right;">&#10060;</button>
     </div>
     {% endfor %}
   </div>
@@ -64,12 +68,16 @@
 <script>
 document.querySelectorAll('.item-qty').forEach(function(input, idx) {
   input.addEventListener('input', function() {
+    let qty = parseInt(input.value) || 1;
+    if (qty < 1) {
+      qty = 1;
+      input.value = 1;
+    }
     // Get price for this item
     const price = parseFloat(
       input.closest('.item-details').querySelector('.item-price').textContent.replace('$','')
     );
     // Calculate new total for this item
-    const qty = parseInt(input.value) || 1;
     const itemTotal = price * qty;
     // Update item total price display
     input.closest('.item-details').querySelector('.item-total-price').textContent = 'Total: $' + itemTotal.toFixed(2);
@@ -83,11 +91,24 @@ document.querySelectorAll('.item-qty').forEach(function(input, idx) {
     });
     document.getElementById('sub-total').textContent = subtotal.toFixed(2);
 
+    // Calculate total quantity
+    let total_quantity = 0;
+    document.querySelectorAll('.cart-item').forEach(function(item) {
+      const qty = parseInt(item.querySelector('.item-qty').value) || 1;
+      total_quantity += qty;
+    });
+
+    // Update other charges
+    let otherCharges = 0;
+    if (total_quantity >= 5) {
+      otherCharges = +(subtotal * 0.015).toFixed(2);
+    }
+    document.getElementById('other-charges').textContent = otherCharges.toFixed(2);
+
     // Update taxes and total
-    const taxes = +(subtotal * 0.10).toFixed(2);
+    const taxes = +(subtotal * 0.18).toFixed(2);
     document.getElementById('taxes').textContent = taxes.toFixed(2);
 
-    const otherCharges = parseFloat(document.getElementById('other-charges').textContent) || 0;
     const total = subtotal + taxes + otherCharges;
     document.getElementById('total-amount').textContent = total.toFixed(2);
 
@@ -98,5 +119,17 @@ document.querySelectorAll('.item-qty').forEach(function(input, idx) {
     document.getElementById('hidden-total').value = document.getElementById('total-amount').textContent;
   });
 });
+
+function removeFromCart(index) {
+  fetch(`/remove_from_cart/${index}`, { method: 'POST' })
+    .then(response => {
+      if (response.redirected) {
+        window.location.href = response.url;
+      } else {
+        location.reload();
+      }
+    })
+    .catch(() => alert("Error removing item"));
+}
 </script>
 {% endblock %}

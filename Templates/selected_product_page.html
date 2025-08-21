@@ -43,4 +43,38 @@ brewed coffee.</p>
     {% endfor %}
     </div>
  </section>
+ <script>
+document.querySelectorAll('.product-sizes-and-price button').forEach(function(btn, idx) {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    // Determine size based on button index
+    const sizes = ['small', 'medium', 'large'];
+    const size = sizes[idx];
+    // Get product info from template variables
+    const productId = "{{ product.id }}";
+    const productName = "{{ product.name }}";
+    const productImg = "{{ product.img }}";
+    // Prepare data
+    const data = new URLSearchParams();
+    data.append('product_id', productId);
+    data.append('product_name', productName);
+    data.append('product_img', productImg);
+    data.append('size', size);
+    // Send AJAX POST to /cart
+    fetch("{{ url_for('cart') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: data.toString()
+    })
+    .then(response => {
+      if (response.redirected) {
+        window.location.href = response.url; // Redirect to cart
+      } else {
+        alert("Added to cart!");
+      }
+    })
+    .catch(() => alert("Error adding to cart"));
+  });
+});
+</script>
 {% endblock %}

@@ -1,8 +1,9 @@
 from flask import Flask,render_template
 from collections import defaultdict
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Needed for session
 
 # About page route
 @app.route("/about")
@@ -58,24 +59,40 @@ def contact():
     return render_template('Contact_uspage.html')
 
 # Cart page route
-@app.route('/cart')
+@app.route('/cart', methods=['GET', 'POST'])
 def cart():
-    
-    cart_items = [
-       
-    ]
-    # Calculate subtotal
+    if request.method == 'POST':
+        product_id = request.form.get('product_id')
+        product_name = request.form.get('product_name')
+        product_img = request.form.get('product_img')
+        size = request.form.get('size')
+        size_price_map = {'small': 5.0, 'medium': 7.0, 'large': 9.0}
+        price = size_price_map.get(size, 5.0)
+        cart_item = {
+            'id': product_id,
+            'name': product_name,
+            'image': product_img,
+            'size': size,
+            'price': price,
+            'quantity': 1
+        }
+        if 'cart' not in session:
+            session['cart'] = []
+        session['cart'].append(cart_item)
+        session.modified = True
+        # After adding, redirect to GET so the cart page updates
+        return redirect(url_for('cart'))
+
+    # For GET, show the cart
+    cart_items = session.get('cart', [])
     subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
-    # Calculate total quantity
     total_quantity = sum(item['quantity'] for item in cart_items)
-    # Apply other charges only if 3 or more items are ordered
-    if total_quantity >= 3:
-        other_charges = round(subtotal * 0.015, 2)  # 1.5% of subtotal
+    if total_quantity >= 5:
+        other_charges = round(subtotal * 0.015, 2)
     else:
         other_charges = 0.00
-    taxes = round(subtotal * 0.18, 2)  # 18% tax
+    taxes = round(subtotal * 0.18, 2)
     total = round(subtotal + taxes + other_charges, 2)
-    # Render the shopping cart template with calculated values
     return render_template(
         'Shopping_cart.html',
         cart_items=cart_items,
@@ -107,6 +124,14 @@ def payment():
 def feedback():
     # Placeholder for feedback page
     return "<h2>Feedback page coming soon!</h2>"
+
+# Remove item from cart route
+@app.route('/remove_from_cart/<int:index>', methods=['POST'])
+def remove_from_cart(index):
+    if 'cart' in session and 0 <= index < len(session['cart']):
+        session['cart'].pop(index)
+        session.modified = True
+    return redirect(url_for('cart'))
 
 
 # Order confirmation and payment validation route

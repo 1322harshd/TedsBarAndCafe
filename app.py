@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Database configuration (SQLite for example)
 # change URI to PostgreSQL/MySQL if required
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13Dhillon40%nz@TedsBarAndCafe'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13Dhillon%40nz@localhost:5432/TedsBarAndCafeDatabase'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # initialize db with app
@@ -42,7 +42,7 @@ def filter_category(category):
 def selected_product(id):
     product = Product.query.get_or_404(id)  # get product or 404
     prices = ProductPrice.query.filter_by(product_id=id).all()  # get prices for all sizes
-    return render_template("selected_product.html", product=product, prices=prices)
+    return render_template("selected_product_page.html", product=product, prices=prices)
 
 # Contact page route
 @app.route('/contact')

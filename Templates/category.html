@@ -7,7 +7,7 @@
     <a href="{{ url_for('selected_product', id=item.id) }}">
         <div class="card-items">
             <div class="img-container">
-                <img src="{{ url_for('static', filename='images/' ~ item.img) }}" alt="{{ category }}">
+                <img src="{{ url_for('static', filename='images/' ~ item.image_url) }}" alt="{{ category }}">
             </div>
             <div class="card-item-info">
                 <p>{{ item.name }}</p>

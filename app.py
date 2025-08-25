@@ -1,15 +1,20 @@
 from flask import Flask, render_template,request
-from models import db, Product, Size, ProductPrice
+from models import db, Product, Size, ProductPrice, CartItem, PaymentInfo
+import uuid
 from collections import defaultdict
 from flask import Flask, render_template, request, session, redirect, url_for
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for session
 
 # Database configuration (SQLite for example)
 # change URI to PostgreSQL/MySQL if required
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13Dhillon%40nz@localhost:5432/TedsBarAndCafeDatabase'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:2003@localhost:5432/TedsBarAndCafeDatabase'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Initialize the database and migration
+migrate = Migrate(app, db)  # <-- This line is required!
 
 # initialize db with app
 db.init_app(app)
@@ -82,6 +87,23 @@ def cart():
             session['cart'] = []
         session['cart'].append(cart_item)
         session.modified = True
+
+        
+        if 'sid' not in session:
+            session['sid'] = str(uuid.uuid4())
+
+        new_cart_item = CartItem(
+            session_id=session['sid'],
+            product_id=product_id,
+            product_name=product_name,
+            product_img=product_img,
+            size=size,
+            price=price,
+            quantity=1
+        )
+        db.session.add(new_cart_item)
+        db.session.commit()
+
         # After adding, redirect to GET so the cart page updates
         return redirect(url_for('cart'))
 
@@ -185,6 +207,29 @@ def order_confirmation():
                 other_charges=other_charges,
                 total=total
             )
+        
+        if 'sid' not in session:
+            session['sid'] = str(uuid.uuid4())
+
+        payment_info = PaymentInfo(
+            session_id=session['sid'],
+            fullname=fullname,
+            email=request.form.get('email', ''),
+            phone=request.form.get('phone', ''),
+            address=request.form.get('address', ''),
+            instructions=request.form.get('instructions', ''),
+            card_number=card_number,
+            expiry=expiry,
+            cvc=cvc,
+            card_name=card_name,
+            subtotal=subtotal,
+            taxes=taxes,
+            other_charges=other_charges,
+            total=total
+        )
+        db.session.add(payment_info)
+        db.session.commit()
+
         # if the Payment successful, show confirmation with success=True
         return render_template('order_confirmation.html', success=True)
     # If GET request, show confirmation with success=False optional

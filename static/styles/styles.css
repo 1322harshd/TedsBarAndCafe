@@ -251,9 +251,12 @@ footer{
     gap: 1rem;               
     padding-bottom: 0.5rem; 
 } 
+.product-card a{
+  text-decoration:none;
+  flex-shrink: 0;   
+}
 .card-items{
-    min-width: 200px;           
-    flex-shrink: 0;              
+    min-width: 200px;                        
     background: rgba(232, 214, 185, 1);
     border-radius: 8px;
     padding: 10px;
@@ -273,9 +276,6 @@ footer{
     display: block;
 }
 .card-item-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 10px;
   font-size: 16px;
   font-weight: bold;
@@ -380,11 +380,31 @@ footer{
   font-weight: bolder;
   margin-right:50px;
 }
+.related-product-card{
+    display: flex;             
+    overflow-x: auto;           
+    gap: 1rem;               
+    padding-bottom: 0.5rem; 
+}
+.related-product-card a {
+  text-decoration: none;
+  color: rgba(87, 21, 35, 1);
+   display: flex;             
+    overflow-x: auto;           
+    gap: 1rem;               
+    padding-bottom: 0.5rem; 
+    font-weight: bolder; 
+    flex-shrink: 0;  
+}
+.related-card-items{
+   min-width: 200px;           
+    background: rgba(232, 214, 185, 1);
+    border-radius: 8px;
+    padding: 10px;
 
+}
 .related-card-item-info{
-  display:flex;
-  gap:50%;
-padding-left:50px;
+   text-align: center;
 }
 .related-img-container{
   background-color: rgba(87, 21, 35, 1);
@@ -399,23 +419,7 @@ padding-left:50px;
     height: auto;
     display: block;
 }
-.related-product-card a {
-  text-decoration: none;
-  color: rgba(87, 21, 35, 1);
-   display: flex;             
-    overflow-x: auto;           
-    gap: 1rem;               
-    padding-bottom: 0.5rem; 
-    font-weight: bolder;
-}
-.related-card-items{
-   min-width: 200px;           
-    flex-shrink: 0;              
-    background: rgba(232, 214, 185, 1);
-    border-radius: 8px;
-    padding: 10px;
 
-}
 
 /* --- Contact Page Styles --- */
 

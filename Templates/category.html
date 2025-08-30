@@ -1,8 +1,7 @@
-
 <div class="all-lists">
 {% for category, items in grouped_items.items() %}
     <h2>{{ category }}</h2>
-    <div class="product-card">
+    <div class="{% if multiple_categories %}product-card{% else %}-categorized{% endif %}">
     {% for item in items %}
     <a href="{{ url_for('selected_product', id=item.id) }}">
         <div class="card-items">

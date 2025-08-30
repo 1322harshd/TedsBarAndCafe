@@ -214,10 +214,24 @@ footer{
   padding:10px 10px 10px 10px;
   align-items: center;
 }
+.drink-of-the-day img{
+  background-color: rgba(87, 21, 35, 1);
+  padding:10px;
+  border-radius: 10px;
+  width: fit-content;
+  height: fit-content;
+}
+.drink-of-the-day a {
+  position: relative;
+  z-index: 5;
+  display: block;
+  text-decoration: none;
+}
+
 .details{
   display:flex;
   color:rgba(87, 21, 35, 1);
-  justify-content: space-between;
+  justify-content: center;
 }
 .current-offer{
   border-radius: 5px;
@@ -287,6 +301,54 @@ footer{
   flex: 1;
   text-align: center;
 }
+/* css for categorized list on menu page to show grid layout */
+/* Styles for categorized product card */
+/* Categorized product card grid */
+.-categorized {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* exactly 4 items per row */
+    gap: 1rem; /* spacing between cards */
+    padding: 0.5rem; 
+}
+
+/* Individual card styling */
+.-categorized .card-items {
+    background: rgba(232, 214, 185, 1);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.-categorized a{
+  text-decoration: none;
+}
+/* Image container styling */
+.-categorized .img-container {
+    background-color: rgba(87, 21, 35, 1);
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: fit-content; /* fixed height for uniformity */
+}
+
+.-categorized .img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+/* Card info styling */
+.-categorized .card-item-info {
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #571523;
+    text-align: center;
+}
 /* ---selected product page ---*/
 
 /* style for product image and name */
@@ -329,13 +391,20 @@ footer{
   width: 100%; 
   height:100%;
 }
-.product-description{
+.product-description {
+  display: flex;
+  justify-content: center;
+  align-items: center;   
   background-color: rgba(243, 229, 194, 1);
-  color:rgba(87, 21, 35, 1);
+  color: rgba(87, 21, 35, 1);
   font-style: italic;
   text-align: justify;
-  padding:  0 40px;
+  padding: 0 40px;
   font-size: larger;
+}
+.product-description p{
+  align-items: center;
+ 
 }
 .product-sizes-and-price{
   background-color:rgba(238, 232, 218, 1) ;
@@ -345,7 +414,7 @@ footer{
   display: flex;
   justify-content: center;
   align-items: flex-end;
-    justify-content:space-evenly;
+  justify-content:space-evenly;
 }
 .product-sizes-and-price ul li button{
   background: none;
@@ -376,8 +445,8 @@ footer{
 
 .related-products h2{
   color: rgba(87, 21, 35, 1);
-  font-size: larger;
-  font-weight: bolder;
+  font-size: 25px;
+  margin-top:0;
   margin-right:50px;
 }
 .related-product-card{

@@ -5,6 +5,8 @@ from collections import defaultdict
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+import random
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for session
@@ -41,15 +43,22 @@ def group_items(item_list):
 def menu_page():
     items = Product.query.all()  # fetch all products
     grouped_items = group_items(items)  # group by category
-    return render_template("menu_page.html", grouped_items=grouped_items)
-
+    
+    # Select coffee of the day (random but from same items)
+    coffee = None
+    if items:
+        today = datetime.date.today()
+        index = today.toordinal() % len(items)
+        coffee = items[index]
+    
+    return render_template("menu_page.html", grouped_items=grouped_items, coffee=coffee,multiple_categories=True)
 
 # route → shows products filtered by category (like "Hot Coffees")
 @app.route("/filter/<category>")
 def filter_category(category):
     filtered = Product.query.filter(Product.category.ilike(category)).all()
     grouped_items = group_items(filtered)
-    return render_template("category.html", grouped_items=grouped_items)
+    return render_template("category.html", grouped_items=grouped_items,multiple_categories=False)
 
 
 # route → shows details of a single product, including sizes and prices

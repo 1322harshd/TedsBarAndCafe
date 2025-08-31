@@ -1,3 +1,15 @@
+/* Alert message for cart/payment errors */
+.alert {
+  color: #d32f2f;
+  font-weight: bold;
+  margin-bottom: 16px;
+  padding: 10px 18px;
+  background: #fff8f0;
+  border: 2px solid #d32f2f;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 17px;
+}
 /* webpage*/
 body{
      font-family: 'Open Sans', sans-serif;
@@ -694,6 +706,20 @@ footer{
   font-weight: bold;
   font-size: 16px;
 }
+.remove-item-btn {
+  color: #000 !important; /* Black color */
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 2;
+}
+.cart-item {
+  position: relative;
+}
 
 /* Row for Each Summary Item */
 .summary-row {
@@ -781,7 +807,7 @@ footer{
      color:rgba(87, 21, 35, 1);
 }
 
-/* Confirmation container centers the message box on the page and styles it */
+/* order Confirmation container centers the message box on the page and styles it */
 .confirmation-container {
   display: flex;
   flex-direction: column;

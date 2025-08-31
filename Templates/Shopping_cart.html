@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="shopping-cart">
+  {% if message %}
+    <div class="alert">{{ message }}</div>
+  {% endif %}
   <h1>Shopping cart</h1>
   <div class="cart-items">
     {% for item in cart_items %}
@@ -25,7 +28,7 @@
           </span>
         </div>
       </div>
-      <button class="remove-item-btn" onclick="removeFromCart('{{ loop.index0 }}')" title="Remove item" style="background:none;border:none;cursor:pointer;font-size:18px;float:right;">&#10060;</button>
+      <button class="remove-item-btn" onclick="removeFromCart('{{ loop.index0 }}')" title="Remove item">&times;</button>
     </div>
     {% endfor %}
   </div>

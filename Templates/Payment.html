@@ -22,11 +22,11 @@
             <input type="text" name="address" id="address" placeholder="for ex - great south road" required />
 
             <label>Special Instructions</label>
-            <textarea name="instructions" id="instructions" placeholder="for ex- ditery or use hot bag to deliver"></textarea>
+            <textarea name="instructions" id="instructions" placeholder="for ex- when you need the drink" required></textarea>
 
             <label>Card Number</label>
             
-            <input type="text" name="card_number" placeholder="for ex-1111-1111-1111-1111" required />
+            <input type="text" name="card_number" id="card_number" placeholder="for ex-1111-1111-1111-1111" required />
 
             <div class="payment-popup-row">
                 
@@ -147,6 +147,36 @@ document.querySelectorAll('.payment-popup-tabs .tab').forEach(function(tab) {
     tab.classList.add('active');
     // Optionally,  it will show or hide tab content here
   });
+});
+
+document.getElementById('card_number').addEventListener('input', function(e) {
+  let value = e.target.value.replace(/\D/g, '').slice(0,16);
+  let formatted = value.replace(/(.{4})/g, '$1-').replace(/-$/, '');
+  e.target.value = formatted;
+});
+
+let paymentTimeout = false;
+setTimeout(function() {
+    paymentTimeout = true;
+    alert("Payment session expired. Please try again.");
+}, 2 * 60 * 1000); // 2 minutes
+
+document.getElementById('payment-form').addEventListener('submit', function(e) {
+    if (paymentTimeout) {
+        // Prevent normal submission
+        e.preventDefault();
+        // Add a hidden field to indicate timeout
+        if (!document.getElementById('timeout')) {
+            let timeoutInput = document.createElement('input');
+            timeoutInput.type = 'hidden';
+            timeoutInput.name = 'timeout';
+            timeoutInput.value = '1';
+            timeoutInput.id = 'timeout';
+            this.appendChild(timeoutInput);
+        }
+        // Optionally, submit the form to show failed message
+        this.submit();
+    }
 });
 </script>
 {% endblock %}

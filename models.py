@@ -16,7 +16,7 @@ class Product(db.Model):
 
 class Size(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20), nullable=False)  # Small, Medi
+    name = db.Column(db.String(20), nullable=False) 
 
 class ProductPrice(db.Model):
     id = db.Column(db.Integer, primary_key=True)

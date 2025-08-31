@@ -8,7 +8,7 @@
   <div class="cart-items">
     {% for item in cart_items %}
     <div class="cart-item">
-      <img src="{{ url_for('static', filename='images/' ~ item.image) }}" alt="{{ item.name }}">
+      <img src="{{ url_for('static', filename='images/' ~ item.image_url) }}" alt="{{ item.name }}">
       <div class="item-details">
         <span class="item-name">{{ item.name }}</span>
         <div class="item-size-row">

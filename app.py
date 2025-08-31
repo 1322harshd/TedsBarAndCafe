@@ -4,6 +4,7 @@ import uuid
 from collections import defaultdict
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_migrate import Migrate
+from models import ContactMessage
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -60,10 +61,30 @@ def selected_product(id):
 
  
 # Contact page route
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
-    # Render the contact us page template
-    return render_template('Contact_uspage.html')
+    from models import ContactMessage  # Import the model
+    message = None
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        msg = request.form.get('message', '').strip()
+        # Add this block to ensure session ID exists
+        if 'sid' not in session:
+            session['sid'] = str(uuid.uuid4())
+        if name and email and msg:
+            contact_msg = ContactMessage(
+                name=name,
+                email=email,
+                message=msg,
+                session_id=session['sid']  # Pass session ID here
+            )
+            db.session.add(contact_msg)
+            db.session.commit()
+            message = "Thank you for contacting us! Your message has been received."
+        else:
+            message = "Please fill in all fields."
+    return render_template('Contact_uspage.html', message=message)
 
 # Cart page route
 @app.route('/cart', methods=['GET', 'POST'])
@@ -134,6 +155,19 @@ def payment():
     taxes = request.args.get('taxes', 0, type=float)
     other_charges = request.args.get('other_charges', 0, type=float)
     total = request.args.get('total', 0, type=float)
+    cart_items = session.get('cart', [])
+    if not cart_items:
+        # If cart is empty, show message and prevent payment
+        message = "Please add an item to your cart before proceeding to payment."
+        return render_template(
+            'Shopping_cart.html',
+            cart_items=cart_items,
+            subtotal=subtotal,
+            taxes=taxes,
+            other_charges=other_charges,
+            total=total,
+            message=message
+        )
     # Render the payment page with summary values
     return render_template(
         'payment.html',
@@ -162,12 +196,17 @@ def remove_from_cart(index):
 @app.route('/order_confirmation', methods=['GET', 'POST'])
 def order_confirmation():
     if request.method == 'POST':
+        timeout = request.form.get('timeout')
+        if timeout == '1':
+            # Show failed payment message due to timeout
+            return render_template('order_confirmation.html', success=False)
         # Get form data from payment page
         fullname = request.form.get('fullname', '').strip()
         card_number = request.form.get('card_number', '').replace(' ', '').replace('-', '')
         expiry = request.form.get('expiry', '').strip()
         cvc = request.form.get('cvc', '').strip()
         card_name = request.form.get('card_name', '').strip()
+        instructions = request.form.get('instructions', '').strip()
         errors = []
 
         # Get summary values from hidden fields
@@ -195,6 +234,8 @@ def order_confirmation():
             errors.append("CVC must be exactly 3 digits.")
         if not card_name:
             errors.append("Name on card is required.")
+        if not instructions:
+            errors.append("Special instructions are required.")
 
         # If there are errors, re-render payment page with errors
         if errors:
@@ -225,7 +266,8 @@ def order_confirmation():
             subtotal=subtotal,
             taxes=taxes,
             other_charges=other_charges,
-            total=total
+            total=total,
+            status="success"
         )
         db.session.add(payment_info)
         db.session.commit()
@@ -234,6 +276,7 @@ def order_confirmation():
         return render_template('order_confirmation.html', success=True)
     # If GET request, show confirmation with success=False optional
     return render_template('order_confirmation.html', success=False)
+
 
 # Run the development server
 if __name__ == '__main__':

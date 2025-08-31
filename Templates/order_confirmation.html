@@ -20,7 +20,8 @@
     <p>Please review your card details and try again.</p>
     <p>If you continue to experience issues, <a href="{{ url_for('contact') }}">contact our support team</a>.</p>
     <div class="confirmation-links">
-      <a href="{{ url_for('menu_page') }}">Back to Menu</a>
+    <a href="{{ url_for('menu_page') }}">Back to Menu</a> |
+    <a href="{{ url_for('cart') }}">Back to Cart</a>
     </div>
   {% endif %}
 </div>

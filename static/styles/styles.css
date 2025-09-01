@@ -230,8 +230,8 @@ footer{
   background-color: rgba(87, 21, 35, 1);
   padding:10px;
   border-radius: 10px;
-  width: fit-content;
-  height: fit-content;
+  width: 280px;
+  height: 200px;
 }
 .drink-of-the-day a {
   position: relative;

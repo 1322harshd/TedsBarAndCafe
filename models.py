@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+import datetime
 
 db = SQLAlchemy() 
 
@@ -11,6 +12,8 @@ class Product(db.Model):
     category = db.Column(db.String(20), nullable=True)
     description = db.Column(db.Text, nullable=True)      
     image_url = db.Column(db.String(300), nullable=True)
+    is_reward_eligible = db.Column(db.Boolean, default=False)
+
     def __repr__(self):
         return f"<Product {self.name}>"
 
@@ -60,6 +63,7 @@ class PaymentInfo(db.Model):
     other_charges = db.Column(db.Float, nullable=False)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)
+    purchase_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 class ContactMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)

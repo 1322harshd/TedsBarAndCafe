@@ -17,7 +17,7 @@
       <ul>
         {% for sp in sizes_with_prices %}
           <li>
-            <button onclick="selectSize('{{ sp.size.name }}', '{{ sp.price }}')">
+            <button data-size="{{ sp.size.name }}" data-size-id="{{ sp.size.id }}" data-price="{{ sp.price }}">
               <img src="{{ url_for('static', filename='logos/coffee-cup.webp') }}" 
                   alt="{{ sp.size.name }}-cup"
                   height="{{ 60 + loop.index0*10 }}px"
@@ -48,22 +48,22 @@
     </div>
  </section>
  <script>
-document.querySelectorAll('.product-sizes-and-price button').forEach(function(btn, idx) {
+document.querySelectorAll('.product-sizes-and-price button').forEach(function(btn) {
   btn.addEventListener('click', function(e) {
     e.preventDefault();
-    // Determine size based on button index
-    const sizes = ['small', 'medium', 'large'];
-    const size = sizes[idx];
-    // Get product info from template variables
+    // Get size from button attribute
+    const size = btn.getAttribute('data-size');
+    const price = btn.getAttribute('data-price');
     const productId = "{{ product.id }}";
     const productName = "{{ product.name }}";
-    const productImg = "{{ product.img }}";
-    // Prepare data
+    const productImg = "{{ product.image_url }}";
     const data = new URLSearchParams();
     data.append('product_id', productId);
     data.append('product_name', productName);
     data.append('product_img', productImg);
     data.append('size', size);
+    const sizeId = btn.getAttribute('data-size-id');
+    data.append('size_id', sizeId);
     // Send AJAX POST to /cart
     fetch("{{ url_for('cart') }}", {
       method: "POST",
@@ -71,11 +71,7 @@ document.querySelectorAll('.product-sizes-and-price button').forEach(function(bt
       body: data.toString()
     })
     .then(response => {
-      if (response.redirected) {
-        window.location.href = response.url; // Redirect to cart
-      } else {
-        alert("Added to cart!");
-      }
+      alert("Added to cart!");
     })
     .catch(() => alert("Error adding to cart"));
   });

@@ -111,8 +111,15 @@ def cart():
         product_name = request.form.get('product_name')
         product_img = request.form.get('product_img')
         size = request.form.get('size')
-        size_price_map = {'small': 5.0, 'medium': 7.0, 'large': 9.0}
-        price = size_price_map.get(size, 5.0)
+        
+        # Fetch price from ProductPrice table
+        size_id = request.form.get('size_id')
+        price_obj = ProductPrice.query.filter_by(product_id=product_id, size_id=size_id).first()
+        if price_obj:
+            price = price_obj.price
+        else:
+            price = 0.0
+        
         cart_item = {
             'id': product_id,
             'name': product_name,
@@ -289,12 +296,57 @@ def order_confirmation():
         db.session.add(payment_info)
         db.session.commit()
 
-        # if the Payment successful, show confirmation with success=True
-        return render_template('order_confirmation.html', success=True)
+        # After validating payment info and before saving payment
+        cart_items = session.get('cart', [])
+        free_applied = False
+        if check_free_drink_eligibility(card_number):
+            for item in cart_items:
+                product = Product.query.get(int(item['id']))
+                if product and product.is_reward_eligible:
+                    item['price'] = 0.0  # Make the first eligible drink free
+                    free_applied = True
+                    message = "Congratulations! Your selected drink is free today!"
+                    # Update the price in the database for the cart item
+                    cart_item_db = CartItem.query.filter_by(
+                        session_id=session['sid'],
+                        product_id=int(item['id'])
+                    ).first()
+                    if cart_item_db:
+                        cart_item_db.price = 0.0
+                        db.session.commit()
+                    break
+        if not free_applied:
+            message = None
+
+        # Pass 'message' to your template when rendering
+        return render_template('order_confirmation.html', success=True, message=message)
     # If GET request, show confirmation with success=False optional
     return render_template('order_confirmation.html', success=False)
 
+def check_free_drink_eligibility(card_number):
+    today = datetime.date.today()
+    days = [today - datetime.timedelta(days=i) for i in range(6, 0, -1)]  # 6 previous days
 
+    for day in days:
+        # Find a payment for this card on this day
+        payment = PaymentInfo.query.filter(
+            PaymentInfo.card_number == card_number,
+            db.func.date(PaymentInfo.purchase_date) == day
+        ).first()
+        if not payment:
+            return False
+        # Check if any eligible product was bought in the cart for this payment
+        cart_items = CartItem.query.filter_by(session_id=payment.session_id).all()
+        found_eligible = False
+        for item in cart_items:
+            product = Product.query.get(item.product_id)
+            if product and product.is_reward_eligible and item.quantity > 0:
+                found_eligible = True
+                break
+        if not found_eligible:
+            return False
+    # If all 6 previous days have a purchase of any eligible drink, eligible for free drink today
+    return True
 # Run the development server
 if __name__ == '__main__':
     app.run(debug=True)

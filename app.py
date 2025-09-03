@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 import random
 import datetime
 import os
+import jinja2
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for session
@@ -65,7 +66,7 @@ def menu_page():
         index = today.toordinal() % len(items)
         coffee = items[index]
    
-    return render_template("menu_page.html", grouped_items=grouped_items, coffee=coffee,multiple_categories=True)
+    return safe_render("menu_page.html", grouped_items=grouped_items, coffee=coffee,multiple_categories=True)
  
 # route to show products filtered by category
 @app.route("/filter/<category>")
@@ -361,6 +362,18 @@ def check_free_drink_eligibility(card_number):
             return False
     # If all 6 previous days have a purchase of any eligible drink, eligible for free drink today
     return True
+print("Flask template folder:", app.template_folder)
+print("Jinja search paths:", app.jinja_loader.searchpath)
+
+# Wrap the render_template to catch detailed errors
+def safe_render(template_name, **kwargs):
+    try:
+        return render_template(template_name, **kwargs)
+    except jinja2.TemplateNotFound as e:
+        print(f"TemplateNotFound: {e.name}")
+        print("Files in template folder:", os.listdir(app.template_folder))
+        print("Jinja search paths:", app.jinja_loader.searchpath)
+        raise e
 # Run the development server
 if __name__ == '__main__':
     app.run(debug=True)

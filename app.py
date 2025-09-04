@@ -280,7 +280,7 @@ def order_confirmation():
         if errors:
             # Payment failed, show payment form again
             return render_template(
-                'payment.html',
+                'Payment.html',
                 errors=errors,
                 subtotal=subtotal,
                 taxes=taxes,

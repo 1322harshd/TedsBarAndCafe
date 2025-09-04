@@ -209,7 +209,7 @@ def payment():
         )
     # Render the payment page with summary values
     return render_template(
-        'payment.html',
+        'Payment.html',
         subtotal=subtotal,
         taxes=taxes,
         other_charges=other_charges,

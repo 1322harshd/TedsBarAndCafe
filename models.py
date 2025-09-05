@@ -63,11 +63,23 @@ class PaymentInfo(db.Model):
     other_charges = db.Column(db.Float, nullable=False)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)
-    purchase_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-
+    purchase_date = db.Column(db.DateTime, default=datetime.datetime.now)
+# model for contact messages
 class ContactMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     message = db.Column(db.Text, nullable=False)
     session_id = db.Column(db.String(36), nullable=False)
+
+# model for order details
+class OrderDetail(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  
+    order_id = db.Column(db.Integer, nullable=False, server_default='0')  
+    session_id = db.Column(db.String(64), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    product_name = db.Column(db.String(50), nullable=False)
+    size = db.Column(db.String(20), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+    order_time = db.Column(db.DateTime, default=datetime.datetime.now)

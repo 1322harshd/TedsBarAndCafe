@@ -1,5 +1,5 @@
 from flask import Flask, render_template,request
-from models import db, Product, Size, ProductPrice, CartItem, PaymentInfo
+from models import db, Product, Size, ProductPrice, CartItem, PaymentInfo, OrderDetail
 import uuid
 from collections import defaultdict
 from flask import Flask, render_template, request, session, redirect, url_for
@@ -10,10 +10,10 @@ import random
 import datetime
 import os
 import jinja2
-
+ 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for session
-
+ 
 #Database Configuration
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 if 'RDS_DB_NAME' in os.environ:
@@ -29,7 +29,7 @@ else:
     # our database uri
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13Dhillon%40nz@localhost/TedsBarAndCafeDatabase'
-
+ 
 # initialize the database and migration
 migrate = Migrate(app, db)  
  
@@ -117,7 +117,7 @@ def contact():
         else:
             message = "Please fill in all fields."
     return render_template('Contact_uspage.html', message=message)
-
+ 
 # Cart page route
 @app.route('/cart', methods=['GET', 'POST'])
 def cart():
@@ -147,11 +147,11 @@ def cart():
             session['cart'] = []
         session['cart'].append(cart_item)
         session.modified = True
-
+ 
         
         if 'sid' not in session:
             session['sid'] = str(uuid.uuid4())
-
+ 
         new_cart_item = CartItem(
             session_id=session['sid'],
             product_id=product_id,
@@ -163,10 +163,10 @@ def cart():
         )
         db.session.add(new_cart_item)
         db.session.commit()
-
+ 
         # After adding, redirect to GET so the cart page updates
         return redirect(url_for('cart'))
-
+ 
     # For GET, show the cart
     cart_items = session.get('cart', [])
     subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
@@ -185,7 +185,7 @@ def cart():
         other_charges=other_charges,
         total=total
     )
-
+ 
 # Payment page route
 @app.route('/Payment')
 def payment():
@@ -215,13 +215,13 @@ def payment():
         other_charges=other_charges,
         total=total
     )
-
+ 
 # Feedback page route
 @app.route('/feedback')
 def feedback():
     # Placeholder for feedback page
     return "<h2>Feedback page coming soon!</h2>"
-
+ 
 # Remove item from cart route
 @app.route('/remove_from_cart/<int:index>', methods=['POST'])
 def remove_from_cart(index):
@@ -229,8 +229,8 @@ def remove_from_cart(index):
         session['cart'].pop(index)
         session.modified = True
     return redirect(url_for('cart'))
-
-
+ 
+ 
 # Order confirmation and payment validation route
 @app.route('/order_confirmation', methods=['GET', 'POST'])
 def order_confirmation():
@@ -247,13 +247,13 @@ def order_confirmation():
         card_name = request.form.get('card_name', '').strip()
         instructions = request.form.get('instructions', '').strip()
         errors = []
-
+ 
         # Get summary values from hidden fields
         subtotal = request.form.get('subtotal', 0, type=float)
         taxes = request.form.get('taxes', 0, type=float)
         other_charges = request.form.get('other_charges', 0, type=float)
         total = request.form.get('total', 0, type=float)
-
+ 
         # Validate payment details
         if not fullname:
             errors.append("Full name is required.")
@@ -275,7 +275,7 @@ def order_confirmation():
             errors.append("Name on card is required.")
         if not instructions:
             errors.append("Special instructions are required.")
-
+ 
         # If there are errors, re-render payment page with errors
         if errors:
             # Payment failed, show payment form again
@@ -290,7 +290,7 @@ def order_confirmation():
         
         if 'sid' not in session:
             session['sid'] = str(uuid.uuid4())
-
+ 
         payment_info = PaymentInfo(
             session_id=session['sid'],
             fullname=fullname,
@@ -310,7 +310,27 @@ def order_confirmation():
         )
         db.session.add(payment_info)
         db.session.commit()
+ 
+        # After saving payment_info
+        cart_items = session.get('cart', [])
+        # Generate new order_id
+        last_order = OrderDetail.query.order_by(OrderDetail.order_id.desc()).first()
+        order_id = 1 if not last_order else last_order.order_id + 1
 
+        cart_items = session.get('cart', [])
+        for item in cart_items:
+            order_detail = OrderDetail(
+                order_id=order_id,
+                session_id=session['sid'],
+                product_id=int(item['id']),
+                product_name=item['name'],
+                size=item['size'],
+                price=item['price'],
+                quantity=item['quantity']
+            )
+            db.session.add(order_detail)
+        db.session.commit()
+ 
         # After validating payment info and before saving payment
         cart_items = session.get('cart', [])
         free_applied = False
@@ -332,16 +352,16 @@ def order_confirmation():
                     break
         if not free_applied:
             message = None
-
+ 
         # Pass 'message' to your template when rendering
         return render_template('order_confirmation.html', success=True, message=message)
     # If GET request, show confirmation with success=False optional
     return render_template('order_confirmation.html', success=False)
-
+ 
 def check_free_drink_eligibility(card_number):
     today = datetime.date.today()
     days = [today - datetime.timedelta(days=i) for i in range(6, 0, -1)]  # 6 previous days
-
+ 
     for day in days:
         # Find a payment for this card on this day
         payment = PaymentInfo.query.filter(
@@ -364,7 +384,7 @@ def check_free_drink_eligibility(card_number):
     return True
 print("Flask template folder:", app.template_folder)
 print("Jinja search paths:", app.jinja_loader.searchpath)
-
+ 
 # Wrap the render_template to catch detailed errors
 def safe_render(template_name, **kwargs):
     try:

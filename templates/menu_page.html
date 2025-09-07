@@ -53,6 +53,7 @@ function filterCategory(category) {
     specialsDiv.classList.add('hidden'); // hide specials
 
     const url = `/filter/${category}`; 
+    //javascript fetch API to call the route to get info without reloading page and pass it into id attribute
     fetch(url)
         .then(response => response.text())
         .then(html => {

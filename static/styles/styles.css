@@ -320,12 +320,10 @@ footer{
 /* Categorized product card grid */
 .-categorized {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* exactly 4 items per row */
-    gap: 1rem; /* spacing between cards */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 1rem;
     padding: 0.5rem; 
 }
-
-/* Individual card styling */
 .-categorized .card-items {
     background: rgba(232, 214, 185, 1);
     border-radius: 8px;
@@ -337,7 +335,6 @@ footer{
 .-categorized a{
   text-decoration: none;
 }
-/* Image container styling */
 .-categorized .img-container {
     background-color: rgba(87, 21, 35, 1);
     border-radius: 5px;
@@ -346,7 +343,7 @@ footer{
     justify-content: center;
     align-items: center;
     width: fit-content;
-    height: fit-content; /* fixed height for uniformity */
+    height: fit-content; 
 }
 
 .-categorized .img-container img {
@@ -354,8 +351,6 @@ footer{
     max-height: 100%;
     object-fit: cover;
 }
-
-/* Card info styling */
 .-categorized .card-item-info {
     padding: 10px;
     font-size: 16px;
@@ -379,20 +374,21 @@ footer{
   position:relative;
 }
 .product-image-container .bg {
-  position:absolute;
-  top:0;
-  right:40px;
+  position: absolute;
+  top: 0;
+  right: 40px;
   width: 40%;
   height: 100%;
-  z-index: 1;       
+  z-index: 1;
 }
 
 .product-image-container .fg {
-  position:absolute;
-  top:30px;
-  right:60px;
-  z-index: 2;   
-       
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 75%;
+  transform: translate(-50%, -50%);
+
 }
 .product-image-container h1{
   align-self: center;
@@ -439,7 +435,7 @@ footer{
   font: inherit;
   cursor: pointer;
   display:flex;
-  flex-direction: column; /* stack image & price vertically */
+  flex-direction: column;
   align-items: center;
 
 }
@@ -484,6 +480,8 @@ footer{
     background: rgba(232, 214, 185, 1);
     border-radius: 8px;
     padding: 10px;
+     width: 300px;
+    height:250px;
 
 }
 .related-card-item-info{
@@ -496,6 +494,7 @@ footer{
     display: flex;
     justify-content: center;
     align-items: center;
+    height:200px;
 }
 .related-img-container img {
     max-width: 100%;
@@ -563,7 +562,7 @@ footer{
 }
 .contact-form label {
   display: block;
-  width: 40%;        /* Set to a smaller percentage or use e.g. 120px */
+  width: 40%;        
   margin-top: 15px;
   font-weight: bold;
   color: #5c1a1b;
@@ -707,7 +706,7 @@ footer{
   font-size: 16px;
 }
 .remove-item-btn {
-  color: #000 !important; /* Black color */
+  color: #000 !important; 
   position: absolute;
   top: 12px;
   right: 18px;
@@ -760,7 +759,7 @@ footer{
   cursor: pointer;
   font-weight: bold;
   font-size: 18px;
-  margin-right: 5px; /* aligns with table padding */
+  margin-right: 5px; 
   display: inline-block;
   text-align: center;
   text-decoration: none;

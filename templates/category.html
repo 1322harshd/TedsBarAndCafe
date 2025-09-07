@@ -1,6 +1,8 @@
 <div class="all-lists">
+    <!-- looping over dictionary grouped items to display products -->
 {% for category, items in grouped_items.items() %}
     <h2>{{ category }}</h2>
+    <!-- if-else condition in template to change div name for different styles -->
     <div class="{% if multiple_categories %}product-card{% else %}-categorized{% endif %}">
     {% for item in items %}
     <a href="{{ url_for('selected_product', id=item.id) }}">

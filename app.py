@@ -1,4 +1,3 @@
-from flask import Flask, render_template,request
 from models import db, Product, Size, ProductPrice, CartItem, PaymentInfo, OrderDetail
 import uuid
 from collections import defaultdict
@@ -66,7 +65,7 @@ def menu_page():
         index = today.toordinal() % len(items)
         coffee = items[index]
    
-    return safe_render("menu_page.html", grouped_items=grouped_items, coffee=coffee,multiple_categories=True)
+    return render_template("menu_page.html", grouped_items=grouped_items, coffee=coffee,multiple_categories=True)
  
 # route to show products filtered by category
 @app.route("/filter/<category>")
@@ -384,16 +383,6 @@ def check_free_drink_eligibility(card_number):
     return True
 print("Flask template folder:", app.template_folder)
 print("Jinja search paths:", app.jinja_loader.searchpath)
- 
-# Wrap the render_template to catch detailed errors
-def safe_render(template_name, **kwargs):
-    try:
-        return render_template(template_name, **kwargs)
-    except jinja2.TemplateNotFound as e:
-        print(f"TemplateNotFound: {e.name}")
-        print("Files in template folder:", os.listdir(app.template_folder))
-        print("Jinja search paths:", app.jinja_loader.searchpath)
-        raise e
 # Run the development server
 if __name__ == '__main__':
     app.run(debug=True)

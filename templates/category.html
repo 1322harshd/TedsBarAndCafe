@@ -1,0 +1,21 @@
+<div class="all-lists">
+    <!-- looping over dictionary grouped items to display products -->
+{% for category, items in grouped_items.items() %}
+    <h2>{{ category }}</h2>
+    <!-- if-else condition in template to change div name for different styles -->
+    <div class="{% if multiple_categories %}product-card{% else %}-categorized{% endif %}">
+    {% for item in items %}
+    <a href="{{ url_for('selected_product', id=item.id) }}">
+        <div class="card-items">
+            <div class="img-container">
+                <img src="{{ url_for('static', filename='images/' ~ item.image_url) }}" alt="{{ category }}">
+            </div>
+            <div class="card-item-info">
+                <p>{{ item.name }}</p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    </div>
+{% endfor %}
+</div>

@@ -1,0 +1,47 @@
+
+{% extends 'base.html' %}
+<!-- webpage title -->
+{% block title %}About|Ted's Bar and Café{% endblock %}
+
+{% block content %}
+<!-- welcome section -->
+ <section class="welcome">
+    <h1> Welcome to Ted’s Bar and Café</h1>
+    <h3>Where tradition brews and community blends.</h3>
+ </section>
+<!-- about section for shop -->
+<section class="about">
+    <h1>About Us</h1>
+    <p>
+    Nestled in the heart of the city,Ted’s Bar 
+    and Café is your cozy neighbourhood spot 
+    where warmth meets flavour. We serve locally 
+    roasted coffee, hand-crafted drinks, and 
+    freshly made comfort food in a welcoming
+    space that feels just like home. Whether 
+    you’re grabbing a quick espresso or spending 
+    a slow afternoon with friends, Ted’s is the 
+    place to be.
+    </p>
+</section>
+<!-- coffee image -->
+<figure>
+<img src="{{ url_for('static', filename='logos/coffee_shop.jpeg') }}" alt="cofee_shop" height="400px" width="100%">
+</figure>
+<!-- shop history -->
+<section class="history">
+  <h1>Our History</h1>
+  <p>
+    Ted’s Bar and Café began in 2015 with a simple
+    dream: to create a friendly place where coffee
+    and community come together. What started as 
+    a humble coffee counter has grown into a full-
+    service café and bar, known for its signature 
+    blends, brunches, and buzzing atmosphere. Named
+    after founder Ted Thompson, the café still 
+    honors his philosophy—“good coffee, good vibes,
+    and great people.”
+</p>
+  
+</section>
+{% endblock %}

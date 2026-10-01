@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+<!-- webpage title -->
+{% block title %}Menu|Ted's Bar and Café{% endblock %}
+
+{% block content %}
+<div class="menu-page">
+<!-- filter option for drinks -->
+<section class="filter">
+    <h2>Drinks</h2>
+    <!-- buttons for different categories -->
+    <ul>
+        <li><a href="/menu" style="text-decoration:none;color:rgba(87, 21, 35, 1);">All</a></li>
+        <li><button onclick="filterCategory('Hot Coffees')">Hot Coffees</button>
+        <li><button onclick="filterCategory('Cold Coffees')">Cold Coffees</button>
+        <li><button onclick="filterCategory('Hot Teas')">Hot Teas</button>
+        <li><button onclick="filterCategory('Iced Teas')">Iced Teas</button>
+        <li><button onclick="filterCategory('Other Hot Drinks')">Other Hot Drinks</button>
+        <li><button onclick="filterCategory('Other Cold Drinks')">Other Cold Drinks</button>
+    </ul>
+</section>
+ <div class="product-display">
+<!-- special section on top of menu page for offers -->
+    <div class="specials">
+            <div class="drink-of-the-day">
+                    <h3 style="color:rgba(87, 21, 35, 1);font-weight:800;">Today's Special</h3>
+                    <a href="{{ url_for('selected_product', id=coffee.id) }}">
+                    <img src="{{ url_for('static', filename='images/' ~ coffee.image_url)}}" alt="drink-of-day"></a> 
+                    <div class="details">
+                        <p>{{coffee.name}}</p>   
+                    </div>
+            </div>
+         
+       <div class="current-offer">
+        <p> Buy 6 coffees,<br> your seventh on us.<sup>*</sup></p>
+        <img src="{{ url_for('static', filename='logos/specials.gif') }}" alt="special-offer" style="height: 150px;width:100px;" >
+        <p>* Limited time offer only</p>
+       </div>
+    </div>
+
+<div id="result">
+    {% include "category.html" %}
+</div>
+</div>
+</div>
+
+ <script>
+function filterCategory(category) {
+
+   const specialsDiv = document.querySelector('.specials');
+
+    // when filtering starts
+    isFiltering = true;
+    specialsDiv.classList.add('hidden'); // hide specials
+
+    const url = `/filter/${category}`; 
+    //javascript fetch API to call the route to get info without reloading page and pass it into id attribute
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('result').innerHTML = html;
+        })
+        .catch(error => console.error('Error loading category:', error));
+}
+</script>
+
+{% endblock %}

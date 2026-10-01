@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="product-image-container">
+    <div class="images">
+        <img src="{{ url_for('static', filename='images/background.jpeg') }}" class="bg">
+        <img src="{{ url_for('static', filename='images/' ~ product.image_url) }}" alt="{{product.name}}" class="fg">
+    </div>
+  <h1>{{product.name}}</h1>
+</div>
+<!-- section for product description and product size selection buttons -->
+<section class="product-information">
+    <div class="product-description">
+    <p>{{product.description}}</p>
+    </div>
+    <div class="product-sizes-and-price">
+      <ul>
+        {% for sp in sizes_with_prices %}
+          <li>
+            <button data-size="{{ sp.size.name }}" data-size-id="{{ sp.size.id }}" data-price="{{ sp.price }}">
+              <img src="{{ url_for('static', filename='logos/coffee-cup.webp') }}" 
+                  alt="{{ sp.size.name }}-cup"
+                  height="{{ 60 + loop.index0*10 }}px"
+                  width="{{ 60 + loop.index0*10 }}px">
+              <span>${{ sp.price }}</span>
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+</section>
+<!-- section for related products to the selected products -->
+ <section class="related-products">
+    <h2>Related Products</h2>
+    <div class="related-product-card">
+        {% for product in related_products %}
+         <a href="{{ url_for('selected_product', id=product.id) }}">
+        <div class="related-card-items">
+            <div class="related-img-container">
+                <img src="{{ url_for('static', filename='images/' ~ product.image_url) }}" alt="{{ category }}">
+            </div>
+            <div class="related-card-item-info">
+                <p>{{ product.name }}</p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    </div>
+ </section>
+ <!-- javascript for adding items to shopping cart -->
+ <script>
+document.querySelectorAll('.product-sizes-and-price button').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    // Get size from button attribute
+    const size = btn.getAttribute('data-size');
+    const price = btn.getAttribute('data-price');
+    const productId = "{{ product.id }}";
+    const productName = "{{ product.name }}";
+    const productImg = "{{ product.image_url }}";
+    const data = new URLSearchParams();
+    data.append('product_id', productId);
+    data.append('product_name', productName);
+    data.append('product_img', productImg);
+    data.append('size', size);
+    const sizeId = btn.getAttribute('data-size-id');
+    data.append('size_id', sizeId);
+    // Send AJAX POST to /cart
+    fetch("{{ url_for('cart') }}", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: data.toString()
+    })
+    .then(response => {
+      alert("Added to cart!");
+    })
+    .catch(() => alert("Error adding to cart"));
+  });
+});
+</script>
+{% endblock %}

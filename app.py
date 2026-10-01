@@ -1,0 +1,388 @@
+from models import db, Product, Size, ProductPrice, CartItem, PaymentInfo, OrderDetail
+import uuid
+from collections import defaultdict
+from flask import Flask, render_template, request, session, redirect, url_for
+from flask_migrate import Migrate
+from models import ContactMessage
+from flask_sqlalchemy import SQLAlchemy
+import random
+import datetime
+import os
+import jinja2
+ 
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Needed for session
+ 
+#Database Configuration
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+if 'RDS_DB_NAME' in os.environ:
+    app.config['SQLALCHEMY_DATABASE_URI'] = \
+        'postgresql://{username}:{password}@{host}:{port}/{database}'.format(
+        username=os.environ['RDS_USERNAME'],
+        password=os.environ['RDS_PASSWORD'],
+        host=os.environ['RDS_HOSTNAME'],
+        port=os.environ['RDS_PORT'],
+        database=os.environ['RDS_DB_NAME'],
+    )
+else:
+    # our database uri
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:13Dhillon%40nz@localhost/TedsBarAndCafeDatabase'
+ 
+# initialize the database and migration
+migrate = Migrate(app, db)  
+ 
+# initialize db with app
+db.init_app(app)
+#route to redirect to menu page
+@app.route('/')
+def home():
+    # redirect root URL to /menu
+    return redirect(url_for('menu_page'))
+#about page route
+@app.route("/about")
+def about_page():
+  return render_template('about_page.html')
+ 
+# helper function to group products by category
+def group_items(item_list):
+    grouped = defaultdict(list)
+    for item in item_list:
+        grouped[item.category.strip()].append(item)
+    return grouped
+ 
+ 
+# route to show the full menu grouped by categories
+@app.route("/menu")
+def menu_page():
+    items = Product.query.all()  # fetch all products
+    grouped_items = group_items(items)  # group by category
+   
+    # select coffee of the day
+    coffee = None
+    if items:
+        today = datetime.date.today()
+        index = today.toordinal() % len(items)
+        coffee = items[index]
+   
+    return render_template("menu_page.html", grouped_items=grouped_items, coffee=coffee,multiple_categories=True)
+ 
+# route to show products filtered by category
+@app.route("/filter/<category>")
+def filter_category(category):
+    filtered = Product.query.filter(Product.category.ilike(category)).all()
+    grouped_items = group_items(filtered)
+    return render_template("category.html", grouped_items=grouped_items,multiple_categories=False)
+ 
+ 
+# route to show details of a single product, including sizes and prices
+@app.route("/product/<int:id>")
+def selected_product(id):
+    # get the product the user clicked on
+    product = Product.query.get_or_404(id)
+ 
+     # get all sizes & prices for this product
+    sizes_with_prices = ProductPrice.query.filter_by(product_id=id).all()
+ 
+    # get related products (same category, but not the same product)
+    related_products = Product.query.filter(
+        Product.category == product.category,
+        Product.id != product.id
+    ).limit(4).all()  # limit to 4 items for display
+ 
+    return render_template("selected_product_page.html", product=product, related_products=related_products,sizes_with_prices=sizes_with_prices)
+# Contact page route
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    from models import ContactMessage  # Import the model
+    message = None
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        msg = request.form.get('message', '').strip()
+        # Add this block to ensure session ID exists
+        if 'sid' not in session:
+            session['sid'] = str(uuid.uuid4())
+        if name and email and msg:
+            contact_msg = ContactMessage(
+                name=name,
+                email=email,
+                message=msg,
+                session_id=session['sid']  # Pass session ID here
+            )
+            db.session.add(contact_msg)
+            db.session.commit()
+            message = "Thank you for contacting us! Your message has been received."
+        else:
+            message = "Please fill in all fields."
+    return render_template('Contact_uspage.html', message=message)
+ 
+# Cart page route
+@app.route('/cart', methods=['GET', 'POST'])
+def cart():
+    if request.method == 'POST':
+        product_id = request.form.get('product_id')
+        product_name = request.form.get('product_name')
+        product_img = request.form.get('product_img')
+        size = request.form.get('size')
+        
+        # Fetch price from ProductPrice table
+        size_id = request.form.get('size_id')
+        price_obj = ProductPrice.query.filter_by(product_id=product_id, size_id=size_id).first()
+        if price_obj:
+            price = price_obj.price
+        else:
+            price = 0.0
+        
+        cart_item = {
+            'id': product_id,
+            'name': product_name,
+            'image': product_img,
+            'size': size,
+            'price': price,
+            'quantity': 1
+        }
+        if 'cart' not in session:
+            session['cart'] = []
+        session['cart'].append(cart_item)
+        session.modified = True
+ 
+        
+        if 'sid' not in session:
+            session['sid'] = str(uuid.uuid4())
+ 
+        new_cart_item = CartItem(
+            session_id=session['sid'],
+            product_id=product_id,
+            product_name=product_name,
+            product_img=product_img,
+            size=size,
+            price=price,
+            quantity=1
+        )
+        db.session.add(new_cart_item)
+        db.session.commit()
+ 
+        # After adding, redirect to GET so the cart page updates
+        return redirect(url_for('cart'))
+ 
+    # For GET, show the cart
+    cart_items = session.get('cart', [])
+    subtotal = sum(item['price'] * item['quantity'] for item in cart_items)
+    total_quantity = sum(item['quantity'] for item in cart_items)
+    if total_quantity >= 5:
+        other_charges = round(subtotal * 0.015, 2)
+    else:
+        other_charges = 0.00
+    taxes = round(subtotal * 0.18, 2)
+    total = round(subtotal + taxes + other_charges, 2)
+    return render_template(
+        'Shopping_cart.html',
+        cart_items=cart_items,
+        subtotal=subtotal,
+        taxes=taxes,
+        other_charges=other_charges,
+        total=total
+    )
+ 
+# Payment page route
+@app.route('/Payment')
+def payment():
+    # Get summary values from query parameters
+    subtotal = request.args.get('subtotal', 0, type=float)
+    taxes = request.args.get('taxes', 0, type=float)
+    other_charges = request.args.get('other_charges', 0, type=float)
+    total = request.args.get('total', 0, type=float)
+    cart_items = session.get('cart', [])
+    if not cart_items:
+        # If cart is empty, show message and prevent payment
+        message = "Please add an item to your cart before proceeding to payment."
+        return render_template(
+            'Shopping_cart.html',
+            cart_items=cart_items,
+            subtotal=subtotal,
+            taxes=taxes,
+            other_charges=other_charges,
+            total=total,
+            message=message
+        )
+    # Render the payment page with summary values
+    return render_template(
+        'Payment.html',
+        subtotal=subtotal,
+        taxes=taxes,
+        other_charges=other_charges,
+        total=total
+    )
+ 
+# Feedback page route
+@app.route('/feedback')
+def feedback():
+    # Placeholder for feedback page
+    return "<h2>Feedback page coming soon!</h2>"
+ 
+# Remove item from cart route
+@app.route('/remove_from_cart/<int:index>', methods=['POST'])
+def remove_from_cart(index):
+    if 'cart' in session and 0 <= index < len(session['cart']):
+        session['cart'].pop(index)
+        session.modified = True
+    return redirect(url_for('cart'))
+ 
+ 
+# Order confirmation and payment validation route
+@app.route('/order_confirmation', methods=['GET', 'POST'])
+def order_confirmation():
+    if request.method == 'POST':
+        timeout = request.form.get('timeout')
+        if timeout == '1':
+            # Show failed payment message due to timeout
+            return render_template('order_confirmation.html', success=False)
+        # Get form data from payment page
+        fullname = request.form.get('fullname', '').strip()
+        card_number = request.form.get('card_number', '').replace(' ', '').replace('-', '')
+        expiry = request.form.get('expiry', '').strip()
+        cvc = request.form.get('cvc', '').strip()
+        card_name = request.form.get('card_name', '').strip()
+        instructions = request.form.get('instructions', '').strip()
+        errors = []
+ 
+        # Get summary values from hidden fields
+        subtotal = request.form.get('subtotal', 0, type=float)
+        taxes = request.form.get('taxes', 0, type=float)
+        other_charges = request.form.get('other_charges', 0, type=float)
+        total = request.form.get('total', 0, type=float)
+ 
+        # Validate payment details
+        if not fullname:
+            errors.append("Full name is required.")
+        if not card_number.isdigit() or len(card_number) != 16:
+            errors.append("Card number must be exactly 16 digits.")
+        import re, datetime
+        exp_match = re.match(r'^(\d{2})/(\d{2})$', expiry)
+        if not exp_match:
+            errors.append("Expiry must be in MM/YY format.")
+        else:
+            mm, yy = int(exp_match.group(1)), int(exp_match.group(2)) + 2000
+            now = datetime.datetime.now()
+            exp_date = datetime.datetime(yy, mm, 1)
+            if mm < 1 or mm > 12 or exp_date < now.replace(day=1):
+                errors.append("Card expired or invalid month.")
+        if not (cvc.isdigit() and len(cvc) == 3):
+            errors.append("CVC must be exactly 3 digits.")
+        if not card_name:
+            errors.append("Name on card is required.")
+        if not instructions:
+            errors.append("Special instructions are required.")
+ 
+        # If there are errors, re-render payment page with errors
+        if errors:
+            # Payment failed, show payment form again
+            return render_template(
+                'Payment.html',
+                errors=errors,
+                subtotal=subtotal,
+                taxes=taxes,
+                other_charges=other_charges,
+                total=total
+            )
+        
+        if 'sid' not in session:
+            session['sid'] = str(uuid.uuid4())
+ 
+        payment_info = PaymentInfo(
+            session_id=session['sid'],
+            fullname=fullname,
+            email=request.form.get('email', ''),
+            phone=request.form.get('phone', ''),
+            address=request.form.get('address', ''),
+            instructions=request.form.get('instructions', ''),
+            card_number=card_number,
+            expiry=expiry,
+            cvc=cvc,
+            card_name=card_name,
+            subtotal=subtotal,
+            taxes=taxes,
+            other_charges=other_charges,
+            total=total,
+            status="success"
+        )
+        db.session.add(payment_info)
+        db.session.commit()
+ 
+        # After saving payment_info
+        cart_items = session.get('cart', [])
+        # Generate new order_id
+        last_order = OrderDetail.query.order_by(OrderDetail.order_id.desc()).first()
+        order_id = 1 if not last_order else last_order.order_id + 1
+
+        cart_items = session.get('cart', [])
+        for item in cart_items:
+            order_detail = OrderDetail(
+                order_id=order_id,
+                session_id=session['sid'],
+                product_id=int(item['id']),
+                product_name=item['name'],
+                size=item['size'],
+                price=item['price'],
+                quantity=item['quantity']
+            )
+            db.session.add(order_detail)
+        db.session.commit()
+ 
+        # After validating payment info and before saving payment
+        cart_items = session.get('cart', [])
+        free_applied = False
+        if check_free_drink_eligibility(card_number):
+            for item in cart_items:
+                product = Product.query.get(int(item['id']))
+                if product and product.is_reward_eligible:
+                    item['price'] = 0.0  # Make the first eligible drink free
+                    free_applied = True
+                    message = "Congratulations! Your selected drink is free today!"
+                    # Update the price in the database for the cart item
+                    cart_item_db = CartItem.query.filter_by(
+                        session_id=session['sid'],
+                        product_id=int(item['id'])
+                    ).first()
+                    if cart_item_db:
+                        cart_item_db.price = 0.0
+                        db.session.commit()
+                    break
+        if not free_applied:
+            message = None
+ 
+        # Pass 'message' to your template when rendering
+        return render_template('order_confirmation.html', success=True, message=message)
+    # If GET request, show confirmation with success=False optional
+    return render_template('order_confirmation.html', success=False)
+ 
+def check_free_drink_eligibility(card_number):
+    today = datetime.date.today()
+    days = [today - datetime.timedelta(days=i) for i in range(6, 0, -1)]  # 6 previous days
+ 
+    for day in days:
+        # Find a payment for this card on this day
+        payment = PaymentInfo.query.filter(
+            PaymentInfo.card_number == card_number,
+            db.func.date(PaymentInfo.purchase_date) == day
+        ).first()
+        if not payment:
+            return False
+        # Check if any eligible product was bought in the cart for this payment
+        cart_items = CartItem.query.filter_by(session_id=payment.session_id).all()
+        found_eligible = False
+        for item in cart_items:
+            product = Product.query.get(item.product_id)
+            if product and product.is_reward_eligible and item.quantity > 0:
+                found_eligible = True
+                break
+        if not found_eligible:
+            return False
+    # If all 6 previous days have a purchase of any eligible drink, eligible for free drink today
+    return True
+print("Flask template folder:", app.template_folder)
+print("Jinja search paths:", app.jinja_loader.searchpath)
+# Run the development server
+if __name__ == '__main__':
+    app.run(debug=True)
